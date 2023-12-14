@@ -20,7 +20,7 @@ help=$(cat<<EOF
 Usage: mr_manager ((backup | transfer) <scanner> <pi>)
 
 	examples: mr_manager backup prismaa esterlis
-		  mr_manager transfer prismab cosgrove\n\n
+		mr_manager transfer prismab cosgrove\n\n
 EOF
 )
 
@@ -38,9 +38,9 @@ mr_search() {
 	if FindMyStudy "$scanner" "$pi" | grep -q "$pi"; then
 		echo OK
 		mapfile -t gather_files < <(FindMyStudy "$scanner" "$pi" | grep -i "$pi" | awk '{print $2}')
-        for i in "${gather_files[@]}"; do
-            file_match+=("$i")
-        done
+		for i in "${gather_files[@]}"; do
+			file_match+=("$i")
+		done
 		# appends matches to mris_to_copy array
 		for i in "${file_match[@]}"; do
 			if [[ $i == $scanner* ]]; then
@@ -80,21 +80,21 @@ run_backup() {
 }
 
 run_archive() {
-    for i in "${mris_to_copy[@]}"; do
-        if [[ -f "$i".tgz ]]; then
-            echo "$i" is already archived. Skipping.
-        else
-            echo Archiving "$i"...
-            tar -czf "$i".tgz "$i"
-            rm -r "${i:?}"/
-            echo Completed!
-        fi
-    done
-    }
+	for i in "${mris_to_copy[@]}"; do
+		if [[ -f "$i".tgz ]]; then
+			echo "$i" is already archived. Skipping.
+		else
+			echo Archiving "$i"...
+			tar -czf "$i".tgz "$i"
+			rm -r "${i:?}"/
+			echo Completed!
+		fi
+	done
+	}
 
 run_transfer() {
 	echo Found these to copy for "$pi": "${mris_to_copy[@]}"
-        # copies files from data1 to directory created
+		# copies files from data1 to directory created
 	ssh "$USER"@tauruspet.med.yale.edu 'mkdir -p ~/dicom_backup/\$pi'
 	for i in "${mris_to_copy[@]}"; do
 		echo Copying files for "$i"
@@ -118,7 +118,7 @@ else
 	elif [[ $1 = "backup" ]]; then
 		mr_search
 		run_backup
-        run_archive
+		run_archive
 	# Runs function if transfer is specified
 	elif [[ $1 = "transfer" ]]; then
 		mr_search
@@ -126,7 +126,7 @@ else
 	else
 		# Will print error if first argument isn't correct
 		echo "Backup or Transfer never specified"
-        printf "%s" "$help"
+		printf "%s" "$help"
 		exit 1
 	fi
 fi
