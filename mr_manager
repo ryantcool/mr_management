@@ -15,14 +15,25 @@ Updates:
 	to help run/execute more properly.
 '
 
-help=$(cat<<EOF
+help() {
+underline=$(tput smul)
+nounderline=$(tput rmul)
+bold=$(tput bold)
+normal=$(tput sgr0)
+cat <<EOF
+${underline}${bold}Usage:${nounderline} mr_manager (backup | transfer) <scanner> <pi>${normal}
 
-Usage: mr_manager ((backup | transfer) <scanner> <pi>)
+	${bold}scanner:${normal}
+		prismaa | prismab | prismac | vida
 
-	examples: mr_manager backup prismaa esterlis
-		mr_manager transfer prismab cosgrove\n\n
+	${bold}pi:${normal}
+		esterlis | cosgrove | davis | hillmer | morris
+
+	${bold}examples:${normal}
+		mr_manager backup prismaa esterlis
+		mr_manager transfer prismab cosgrove
 EOF
-)
+}
 
 scanner=$2
 pi=$3
@@ -95,24 +106,25 @@ run_archive() {
 run_transfer() {
 	echo Found these to copy for "$pi": "${mris_to_copy[@]}"
 		# copies files from data1 to directory created
-	ssh "$USER"@tauruspet.med.yale.edu 'mkdir -p ~/dicom_backup/\$pi'
+
+	ssh "$USER"@ursapet.med.yale.edu "mkdir -p ~/dicom_backup/$pi"
 	for i in "${mris_to_copy[@]}"; do
 		echo Copying files for "$i"
-		scp -r /data1/"$scanner"_transfer/"$i" "$USER"@tauruspet.med.yale.edu:/home1/"$USER"/dicom_backup/"$pi"/
+		rsync -rvzP /data1/"$scanner"_transfer/"$i" "$USER"@ursapet.med.yale.edu:/home1/"$USER"/dicom_backup/"$pi"/
 	done
 	echo "Transfer complete!"
 	echo
 }
 
-if [[ $# -lt 1 ]]; then 
+if [[ $# -lt 1 ]]; then
 	# Will print error if not run correctly
 	echo Incorrect usage.
-	printf "%s" "$help"
+	printf "\n%s\n\n" "$(help)"
 	exit 1
 else
 	# Prints usage info if detects help flags
 	if [[ $1 = "-h" || $1 = "--help" ]]; then
-		printf "%s" "$help"
+		printf "\n%s\n\n" "$(help)"
 		exit 0
 	# Runs function if backup is specified
 	elif [[ $1 = "backup" ]]; then
@@ -126,7 +138,7 @@ else
 	else
 		# Will print error if first argument isn't correct
 		echo "Backup or Transfer never specified"
-		printf "%s" "$help"
+		printf "\n%s\n\n" "$(help)"
 		exit 1
 	fi
 fi
