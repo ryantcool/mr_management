@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+: <<'Author_Comment'
+    Rewritten Find-My-Study Script for Bash
+    Author: Ryan Cool
+    Last Updated: 2024-02-07
+    Contact: ryan.cool@yale.edu
+Author_Comment
+
+scanner=$1
+filter=$2
+
+help_text() {
+    echo ""
+    echo "############################################################################"
+    echo ""
+    echo "                         Find my Study Script"
+    echo "                        ----------------------"
+    echo -e "\nUSAGE: $0 <ScannerName>"
+    echo -e "\nAccepted <ScannerName> Values: prismaa | prismab | prismac | sonata|  trio | trioa| triob| timtrioa | timtriob | vida"
+    echo ""
+    echo "      Examples: $0 prismab"
+    echo "                $0 timtriob"
+    echo "                $0 vida"
+    echo ""
+    echo "############################################################################"
+    echo ""
+    echo "     If you have any questions about this script , please contact Ryan"
+    echo "                         at ryan.cool@yale.edu"
+    echo ""
+    echo "############################################################################"
+    echo ""
+}
+
+check_scanner() {
+    if [[ ${scanner,,} == trio ]] ||  [[ ${scanner,,} == timtrioa ]] ||  [[ ${scanner,,} == prismab ]]; then
+        cd /data1/prismab_transfer || exit 1
+    elif [[ ${scanner,,} == sonata ]] || [[ ${scanner,,} == prismaa ]]; then
+        cd /data1/prismaa_transfer || exit 1
+    elif [[ ${scanner,,} == timtrio ]] || [[ ${scanner,,} == timtriob ]] ||  [[ ${scanner,,} == prismac ]]; then
+        cd /data1/prismac_transfer || exit 1
+    elif [[ ${scanner,,} == vida ]]; then
+        cd /data1/vida_transfer || exit 1
+    else
+        printf "\nFalied to run, couldn't find scanner directory\n"
+        help_text
+        exit 1
+    fi
+    printf "\n**Successfully found the %s directory**\n" "$scanner"
+}
+
+print_output() {
+    printf "\n**Changing into %s directory**\n\n" "$scanner"
+    printf "\e[4m%30s | %20s | %10s\e[0m \n"  "Folder Name" "PI" "MR Number"
+    for i in ./*; do
+        cd "$i" || exit
+        lastfile=$(find . -type f -name "MR*" | tail -n1)
+        ReferringPhysiciansName=$(medcon -f "$lastfile" 2> /dev/null | grep -e "ReferringPhysiciansName" | cut -f4 -d' ' | sed -e 's/\[//g' |sed -e 's/\]//g')
+        PatientID=$(medcon -f "$lastfile" 2> /dev/null | grep -e " PatientID" | cut -f4 -d' ' | sed -e 's/\[//g' |sed -e 's/\]//g')
+    if [[ $filter != "" ]]; then
+            printf "%30s | %20s | %10s \n"  "${i:2}" "$ReferringPhysiciansName" "$PatientID" | grep -i "$filter"
+        else
+            printf "%30s | %20s | %10s \n"  "${i:2}" "$ReferringPhysiciansName" "$PatientID"
+    fi
+        cd ../
+    done
+    printf "%67s\n" " "| tr " " "-"
+    printf "*%27s %s %27s*\n" "" "Thank You" ""
+    printf "%67s\n" " "| tr " " "-"
+}
+
+main() {
+    if [[ ${scanner,,} == "-h" ]] || [[ ${scanner,,} == "--help" ]]; then
+        help_text
+        exit 0
+    else
+        check_scanner
+        print_output
+        exit 0
+    fi
+}
+
+main
