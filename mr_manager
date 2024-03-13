@@ -48,7 +48,7 @@ mr_search() {
 	echo Searching latest scans....
 	if FindMyStudy "$scanner" "$pi" | grep -q "$pi"; then
 		echo OK
-		mapfile -t gather_files < <(FindMyStudy "$scanner" "$pi" | grep -i "$pi" | awk '{print $2}')
+		mapfile -t gather_files < <(FindMyStudy "$scanner" "$pi" | grep -i "$pi" | awk '{print $1}')
 		for i in "${gather_files[@]}"; do
 			file_match+=("$i")
 		done
