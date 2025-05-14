@@ -3,64 +3,58 @@
 : <<'Author_Comment'
     Rewritten Find-My-Study Script for Bash
     Author: Ryan Cool
-    Last Updated: 2024-02-07
+    Last Updated: 2025-04-29
     Contact: ryan.cool@yale.edu
 Author_Comment
 
-scanner=$1
-filter=$2
+scanner="${1}"
+pi="${2}"
 
-help_text() {
-    echo ""
-    echo "############################################################################"
-    echo ""
-    echo "                         Find my Study Script"
-    echo "                        ----------------------"
-    echo -e "\nUSAGE: $0 <ScannerName>"
-    echo -e "\nAccepted <ScannerName> Values: prismaa | prismab | prismac | sonata|  trio | trioa| triob| timtrioa | timtriob | vida"
-    echo ""
-    echo "      Examples: $0 prismab"
-    echo "                $0 timtriob"
-    echo "                $0 vida"
-    echo ""
-    echo "############################################################################"
-    echo ""
-    echo "     If you have any questions about this script , please contact Ryan"
-    echo "                         at ryan.cool@yale.edu"
-    echo ""
-    echo "############################################################################"
-    echo ""
-}
+read -r -d '' HELPTEXT <<- EOM
+#################################
+#       FindMyStudy Script      #
+#################################
+
+USAGE: ${0} <ScannerName> [pi]
+    Accepted <ScannerName> Values: prismaa | prismab | prismac | sonata | trio | trioa | triob | timtrioa | timtriob | vida
+Examples:   ${0} prismab              <-- Lists all scans in prismab directory
+            ${0} prismaa constable    <-- Lists scans in prismaa directory for selected pi
+
+#################################################################
+#    If you have any questions about this script please contact #
+#    Ryan at ryan.cool@yale.edu                                 #
+#################################################################
+EOM
 
 check_scanner() {
-    if [[ ${scanner,,} == trio ]] ||  [[ ${scanner,,} == timtrioa ]] ||  [[ ${scanner,,} == prismab ]]; then
+    if [[ "${scanner,,}" == trio ]] ||  [[ "${scanner,,}" == timtrioa ]] ||  [[ "${scanner,,}" == prismab ]]; then
         cd /data1/prismab_transfer || exit 1
-    elif [[ ${scanner,,} == sonata ]] || [[ ${scanner,,} == prismaa ]]; then
+    elif [[ "${scanner,,}" == sonata ]] || [[ "${scanner,,}" == prismaa ]]; then
         cd /data1/prismaa_transfer || exit 1
-    elif [[ ${scanner,,} == timtrio ]] || [[ ${scanner,,} == timtriob ]] ||  [[ ${scanner,,} == prismac ]]; then
+    elif [[ "${scanner,,}" == timtrio ]] || [[ "${scanner,,}" == timtriob ]] ||  [[ "${scanner,,}" == prismac ]]; then
         cd /data1/prismac_transfer || exit 1
-    elif [[ ${scanner,,} == vida ]]; then
+    elif [[ "${scanner,,}" == vida ]]; then
         cd /data1/vida_transfer || exit 1
     else
-        printf "\nFalied to run, couldn't find scanner directory\n"
-        help_text
+        printf "\nFalied to run, couldn't find %s directory\n" "${scanner}"
+        printf "\n%s\n" "${HELPTEXT}"
         exit 1
     fi
-    printf "\n**Successfully found the %s directory**\n" "$scanner"
+    printf "\n**Successfully found the %s directory**\n" "${scanner}"
 }
 
 print_output() {
-    printf "\n**Changing into %s directory**\n\n" "$scanner"
+    printf "\n**Changing into %s directory**\n\n" "${scanner}"
     printf "\e[4m%30s | %20s | %10s\e[0m \n"  "Folder Name" "PI" "MR Number"
     for i in ./*; do
-        cd "$i" || exit
+        cd "${i}" || exit 1
         lastfile=$(find . -type f -name "MR*" | tail -n1)
-        ReferringPhysiciansName=$(medcon -f "$lastfile" 2> /dev/null | grep -e "ReferringPhysiciansName" | cut -f4 -d' ' | sed -e 's/\[//g' |sed -e 's/\]//g')
-        PatientID=$(medcon -f "$lastfile" 2> /dev/null | grep -e " PatientID" | cut -f4 -d' ' | sed -e 's/\[//g' |sed -e 's/\]//g')
-    if [[ $filter != "" ]]; then
-            printf "%30s | %20s | %10s \n"  "${i:2}" "$ReferringPhysiciansName" "$PatientID" | grep -i "$filter"
+        ReferringPhysiciansName=$(medcon -f "${lastfile}" 2> /dev/null | grep -e "ReferringPhysiciansName" | cut -f4 -d' ' | sed -e 's/\[//g' |sed -e 's/\]//g')
+        PatientID=$(medcon -f "${lastfile}" 2> /dev/null | grep -e " PatientID" | cut -f4 -d' ' | sed -e 's/\[//g' |sed -e 's/\]//g')
+    if [[ "${pi}" != "" ]]; then
+            printf "%30s | %20s | %10s \n"  "${i:2}" "${ReferringPhysiciansName}" "${PatientID}" | grep -i "${pi}"
         else
-            printf "%30s | %20s | %10s \n"  "${i:2}" "$ReferringPhysiciansName" "$PatientID"
+            printf "%30s | %20s | %10s \n"  "${i:2}" "${ReferringPhysiciansName}" "${PatientID}"
     fi
         cd ../
     done
@@ -70,8 +64,8 @@ print_output() {
 }
 
 main() {
-    if [[ ${scanner,,} == "-h" ]] || [[ ${scanner,,} == "--help" ]]; then
-        help_text
+    if [[ "${scanner,,}" == "-h" ]] || [[ "${scanner,,}" == "--help" ]]; then
+        printf "\n%s\n" "${HELPTEXT}"
         exit 0
     else
         check_scanner
