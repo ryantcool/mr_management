@@ -54,7 +54,7 @@ mr_search() {
 		done
 		# appends matches to mris_to_copy array
 		for i in "${file_match[@]}"; do
-			if [[ "${i}" == $scanner* ]]; then
+			if [[ "${i}" == "${scanner}"* ]]; then
 				mris_to_copy+=("${i}")
 			fi
 		done
