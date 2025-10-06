@@ -35,8 +35,8 @@ ${underline}${bold}Usage:${nounderline} mr_manager (backup | transfer) <scanner>
 EOF
 }
 
-scanner=$2
-pi=$3
+scanner="${2}"
+pi="${3}"
 
 declare -a file_match
 declare -a mris_to_copy
