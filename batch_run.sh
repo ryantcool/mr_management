@@ -17,6 +17,6 @@ do
     for pi in "${pis[@]}";
     do
         # Change this to location of where the mr_manager script is on your system
-        /home/"${USER}"/codes/pseudo_cron_files/mr_manager backup "${scanner}" "${pi}"
+        /home/"$USER"/codes/pseudo_cron_files/mr_manager backup "$scanner" "$pi"
     done
 done
