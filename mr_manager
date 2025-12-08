@@ -16,12 +16,12 @@ Updates:
 '
 
 help() {
-underline=$(tput smul)
-nounderline=$(tput rmul)
-bold=$(tput bold)
-normal=$(tput sgr0)
-cat <<EOF
-${underline}${bold}Usage:${nounderline} mr_manager (backup | transfer) <scanner> <pi>${normal}
+	underline=$(tput smul)
+	nounderline=$(tput rmul)
+	bold=$(tput bold)
+	normal=$(tput sgr0)
+	cat <<EOF
+${underline}${bold}Usage:${nounderline} mr_manager (backup | transfer) <scanner> <{pi}>${normal}
 
 	${bold}scanner:${normal}
 		prismaa | prismab | prismac | vida
@@ -35,8 +35,8 @@ ${underline}${bold}Usage:${nounderline} mr_manager (backup | transfer) <scanner>
 EOF
 }
 
-scanner=$2
-pi=$3
+scanner="${2}"
+pi="${3}"
 
 declare -a file_match
 declare -a mris_to_copy
@@ -44,22 +44,22 @@ declare -a mris_to_copy
 # Checks if there's a match for the pi's study
 mr_search() {
 	local gather_files
-	echo Running for "$(echo "$pi" | tr '[:lower:]' '[:upper:]')" on "$(echo "$scanner" | tr '[:lower:]' '[:upper:]')"
+	echo Running for "$(echo "${pi}" | tr '[:lower:]' '[:upper:]')" on "$(echo "${scanner}" | tr '[:lower:]' '[:upper:]')"
 	echo Searching latest scans....
-	if FindMyStudy "$scanner" "$pi" | grep -q "$pi"; then
+	if FindMyStudy "${scanner}" "${pi}" | grep -q "${pi}"; then
 		echo OK
-		mapfile -t gather_files < <(FindMyStudy "$scanner" "$pi" | grep -i "$pi" | awk '{print $1}')
+		mapfile -t gather_files < <(FindMyStudy "${scanner}" "${pi}" | grep -i "${pi}" | awk '{print $1}')
 		for i in "${gather_files[@]}"; do
-			file_match+=("$i")
+			file_match+=("${i}")
 		done
 		# appends matches to mris_to_copy array
 		for i in "${file_match[@]}"; do
-			if [[ $i == $scanner* ]]; then
-				mris_to_copy+=("$i")
+			if [[ "${i}" == "${scanner}"* ]]; then
+				mris_to_copy+=("${i}")
 			fi
 		done
 	else
-		echo None found for "$pi" on "$scanner"!
+		echo None found for "${pi}" on "${scanner}"!
 		exit 0
 	fi
 }
@@ -67,23 +67,23 @@ mr_search() {
 run_backup() {
 	echo Initializing backup process....
 	echo
-	echo Found these to copy for "$pi": "${mris_to_copy[@]}"
+	echo Found these to copy for "${pi}": "${mris_to_copy[@]}"
 	echo
 	# creates new directory to copy dicoms to if it doesn't exist already
-	if [[ -d /bigstore1/irina_sophie_data/dicom_backup/"$pi" ]]; then
-		cd /bigstore1/irina_sophie_data/dicom_backup/"$pi" || exit 1
+	if [[ -d /data26/mri_group/irina_sophie_data/dicom_backup/"${pi}" ]]; then
+		cd /data26/mri_group/irina_sophie_data/dicom_backup/"${pi}" || exit 1
 	else
-		mkdir -p /bigstore1/irina_sophie_data/dicom_backup/"$pi"
-		cd /bigstore1/irina_sophie_data/dicom_backup/"$pi" || exit 1
+		mkdir -p /data26/mri_group/irina_sophie_data/dicom_backup/"${pi}"
+		cd /data26/mri_group/irina_sophie_data/dicom_backup/"${pi}" || exit 1
 	fi
 	for i in "${mris_to_copy[@]}"; do
-		if [[ -d $i || -f $i.tgz ]]; then
-			echo "$i" looks to be backed up already. Skipping.
+		if [[ -d "${i}" || -f "${i}".tgz ]]; then
+			echo "${i}" looks to be backed up already. Skipping.
 			echo
 		else
-			mkdir "$i"
-			echo Copying files for "$i"
-			cp -r /data1/"$scanner"_transfer/"$i"/* /bigstore1/irina_sophie_data/dicom_backup/"$pi"/"$i"/
+			mkdir "${i}"
+			echo Copying files for "${i}"
+			cp -r /data1/"${scanner}"_transfer/"${i}"/* /data26/mri_group/irina_sophie_data/dicom_backup/"${pi}"/"${i}"/
 		fi
 	done
 	echo "Backup complete!"
@@ -92,25 +92,25 @@ run_backup() {
 
 run_archive() {
 	for i in "${mris_to_copy[@]}"; do
-		if [[ -f "$i".tgz ]]; then
-			echo "$i" is already archived. Skipping.
+		if [[ -f "${i}".tgz ]]; then
+			echo "${i}" is already archived. Skipping.
 		else
-			echo Archiving "$i"...
-			tar -czf "$i".tgz "$i"
+			echo Archiving "${i}"...
+			tar -czf "${i}".tgz "${i}"
 			rm -r "${i:?}"/
 			echo Completed!
 		fi
 	done
-	}
+}
 
 run_transfer() {
-	echo Found these to copy for "$pi": "${mris_to_copy[@]}"
-		# copies files from data1 to directory created
+	echo Found these to copy for "${pi}": "${mris_to_copy[@]}"
+	# copies files from data1 to directory created
 
-	ssh "$USER"@ursapet.med.yale.edu "mkdir -p ~/dicom_backup/$pi"
+	ssh "${USER}@ursapet.med.yale.edu mkdir -p ~/dicom_backup/${pi}"
 	for i in "${mris_to_copy[@]}"; do
-		echo Copying files for "$i"
-		rsync -rvzP /data1/"$scanner"_transfer/"$i" "$USER"@ursapet.med.yale.edu:/home1/"$USER"/dicom_backup/"$pi"/
+		echo Copying files for "${i}"
+		rsync -rvzP /data1/"${scanner}"_transfer/"${i}" "${USER}"@ursapet.med.yale.edu:/home1/"${USER}"/dicom_backup/"${pi}"/
 	done
 	echo "Transfer complete!"
 	echo

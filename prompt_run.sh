@@ -12,11 +12,11 @@
 # RequestTTY yes will always request a TTY when standard input is a TTY
 # exec tcsh -l can be changed to work for whichever shell you're using on the server
 
-echo "Hello $USER! Would you like to check for mri's? (y/n)"
+echo "Hello ${USER}! Would you like to check for mri's? (y/n)"
 read -r ANSWER
-if [[ $ANSWER == y || $ANSWER == Y || $ANSWER == YES || $ANSWER == Yes || $ANSWER == yes ]]; then
+if [[ "${ANSWER}" == y || "${ANSWER}" == Y || "${ANSWER}" == YES || "${ANSWER}" == Yes || "${ANSWER}" == yes ]]; then
 	# Change this to the file path of where the script is on the remote server
-	/bin/bash -c /home/"$USER"/codes/pseudo_cron_files/batch_run.sh
+	/bin/bash -c /home/"${USER}"/codes/pseudo_cron_files/batch_run.sh
 else
 	echo "Not checking"
 fi
