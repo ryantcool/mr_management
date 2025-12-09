@@ -16,7 +16,7 @@ echo "Hello ${USER}! Would you like to check for mri's? (y/n)"
 read -r ANSWER
 if [[ "${ANSWER}" == y || "${ANSWER}" == Y || "${ANSWER}" == YES || "${ANSWER}" == Yes || "${ANSWER}" == yes ]]; then
 	# Change this to the file path of where the script is on the remote server
-	/bin/bash -c /home/"${USER}"/codes/pseudo_cron_files/batch_run.sh
+	/bin/bash -c /home/"${USER}"/Documents/codes/pseudo_cron_files/batch_run.sh
 else
 	echo "Not checking"
 fi

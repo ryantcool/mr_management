@@ -8,13 +8,13 @@
 # as defined in the arrays labeled pis and scanners
 
 # Change this to match th pi's you are working with
-pis=('esterlis' 'cosgrove' 'davis' 'hillmer' 'morris')
+pis=('esterlis' 'cosgrove' 'davis' 'morris')
 # Change this to the scanners used
-scanners=('prismaa' 'prismab' 'prismac')
+scanners=('prismaa' 'prismab' 'prismac' 'vida')
 
 for scanner in "${scanners[@]}"; do
 	for pi in "${pis[@]}"; do
 		# Change this to location of where the mr_manager script is on your system
-		/home/"${USER}"/codes/pseudo_cron_files/mr_manager backup "${scanner}" "${pi}"
+		/home/"${USER}"/Documents/codes/pseudo_cron_files/mr_manager.sh backup "${scanner}" "${pi}"
 	done
 done
