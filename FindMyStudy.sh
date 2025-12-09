@@ -3,12 +3,12 @@
 : <<'Author_Comment'
     Rewritten Find-My-Study Script for Bash
     Author: Ryan Cool
-    Last Updated: 2025-09-12
+    Last Updated: 2025-12-09
     Contact: ryan.cool@yale.edu
 Author_Comment
 
-scanner="${1}"
-filter="${2}"
+scanner="${1,,}"
+filter="${2,,}"
 
 read -r -d '' HELPTEXT <<-EOM
 	#################################
@@ -31,13 +31,13 @@ EOM
 
 # Function to locate scanner directory where new scans are uploaded
 check_scanner() {
-	if [[ "${scanner,,}" == trio ]] || [[ "${scanner,,}" == timtrioa ]] || [[ "${scanner,,}" == prismab ]]; then
+	if [[ "${scanner}" == trio ]] || [[ "${scanner}" == timtrioa ]] || [[ "${scanner}" == prismab ]]; then
 		cd /data1/prismab_transfer || exit 1
-	elif [[ "${scanner,,}" == sonata ]] || [[ "${scanner,,}" == prismaa ]]; then
+	elif [[ "${scanner}" == sonata ]] || [[ "${scanner}" == prismaa ]]; then
 		cd /data1/prismaa_transfer || exit 1
-	elif [[ "${scanner,,}" == timtrio ]] || [[ "${scanner,,}" == timtriob ]] || [[ "${scanner,,}" == prismac ]]; then
+	elif [[ "${scanner}" == timtrio ]] || [[ "${scanner}" == timtriob ]] || [[ "${scanner}" == prismac ]]; then
 		cd /data1/prismac_transfer || exit 1
-	elif [[ "${scanner,,}" == vida ]]; then
+	elif [[ "${scanner}" == vida ]]; then
 		cd /data1/vida_transfer || exit 1
 	else
 		printf "\nFalied to run, couldn't find %s directory\n" "${scanner}"
@@ -59,9 +59,9 @@ print_output() {
 		if medcon -f "${lastfile}" 2>/dev/null | grep -e "ReferringPhysiciansName" | grep -q "no value"; then
 			ReferringPhysiciansName="no value"
 		else
-			ReferringPhysiciansName=$(medcon -f "${lastfile}" 2>/dev/null | grep -e "ReferringPhysiciansName" | awk '{print $4}' | sed 's!^\[\(.*\)\]$!\1!')
+			ReferringPhysiciansName=$(medcon -f "${lastfile}" 2>/dev/null | grep -e "ReferringPhysiciansName" | sed -E 's/.*\[(.*)\].*/\1/')
 		fi
-		PatientID=$(medcon -f "${lastfile}" 2>/dev/null | grep -e " PatientID" | awk '{print $4}' | sed 's!^\[\(.*\)\]$!\1!')
+		PatientID=$(medcon -f "${lastfile}" 2>/dev/null | grep -e " PatientID" | sed -E 's/.*\[(.*)\].*/\1/')
 		if [[ "${filter}" != "" ]]; then
 			printf "%30s | %20s | %10s \n" "${i:2}" "${ReferringPhysiciansName}" "${PatientID}" | grep -i "${filter}"
 		else
@@ -75,7 +75,7 @@ print_output() {
 }
 
 main() {
-	if [[ "${scanner,,}" == "-h" ]] || [[ "${scanner,,}" == "--help" ]]; then
+	if [[ "${scanner}" == "-h" ]] || [[ "${scanner}" == "--help" ]]; then
 		printf "\n%s\n" "${HELPTEXT}"
 		exit 0
 	else
