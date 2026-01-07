@@ -52,7 +52,14 @@ check_scanner() {
 print_output() {
 	printf "\n**Changing into %s directory**\n\n" "${scanner}"
 	printf "\e[4m%30s | %20s | %10s\e[0m \n" "Folder Name" "PI" "MR Number"
-	for i in ./*; do
+	local cwd
+	cwd=$(pwd)
+	readarray -t folders < <(find . -maxdepth 1 -mindepth 1 -type d -printf '%f\n')
+	if [[ -z "${folders[*]}" ]]; then
+	    printf "\n No folders found in %s\n\n" "${cwd}"
+	    exit 1
+	fi
+	for i in "${folders[@]}"; do
 		cd "${i}" || exit 1
 		lastfile=$(find . -type f -name "MR*" | tail -n1)
 		# Added if statement to handle no value provided in the ReferringPhysiciansName Tag
@@ -63,9 +70,9 @@ print_output() {
 		fi
 		PatientID=$(medcon -f "${lastfile}" 2>/dev/null | grep -e " PatientID" | sed -E 's/.*\[(.*)\].*/\1/')
 		if [[ "${filter}" != "" ]]; then
-			printf "%30s | %20s | %10s \n" "${i:2}" "${ReferringPhysiciansName}" "${PatientID}" | grep -i "${filter}"
+			printf "%30s | %20s | %10s \n" "${i}" "${ReferringPhysiciansName}" "${PatientID}" | grep -i "${filter}"
 		else
-			printf "%30s | %20s | %10s \n" "${i:2}" "${ReferringPhysiciansName}" "${PatientID}"
+			printf "%30s | %20s | %10s \n" "${i}" "${ReferringPhysiciansName}" "${PatientID}"
 		fi
 		cd ../
 	done
